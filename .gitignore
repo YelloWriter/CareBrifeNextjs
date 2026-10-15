@@ -5,4 +5,12 @@ dist
 .firebase
 firebase-debug.log
 sources/
-AGENTS.md
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+.env*
+.vercel/
+.lighthouse/
+test-results/
+supabase/.temp/

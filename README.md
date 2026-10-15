@@ -1,4 +1,8 @@
-# 진료한장
+# 진료한장 — CareBrifeNextjs
+
+[GitHub](https://github.com/YelloWriter/CareBrifeNextjs) · [Next.js 배포](https://carebrief-iota.vercel.app/)
+
+현재 화면·문구·기능을 그대로 유지하고 실행 환경만 Next.js App Router로 전환한 저장소입니다. 원본 기준은 `6b2effd`이며, `src/App.tsx`, `src/styles.css`, `src/i18n.ts`, `public/`은 수정하지 않습니다. 새 화면·기능·데이터 저장소를 추가하지 않습니다.
 
 부모님과 따로 사는 자녀가 부모님의 증상, 복용약, 최근 변화와 의료진께 묻고 싶은 내용을 정리하고 **A4 한 장 리포트**로 미리 확인하는 검증용 정적 웹사이트입니다.
 
@@ -20,13 +24,13 @@
 
 ## 기술 구성
 
-- Vite
-- React
+- Next.js 16 App Router
+- React 19
 - TypeScript
 - WebLLM
-- Firebase Hosting
+- Vercel
 
-별도 서버, 데이터베이스, 파일 저장소 또는 유료 API를 사용하지 않습니다.
+Next.js는 페이지 실행과 배포를 담당합니다. 데이터베이스, 파일 저장소 또는 유료 API를 추가하지 않았으며 기존 입력은 브라우저 메모리 안에서만 처리합니다.
 
 ## 무료 AI와 음성 입력
 
@@ -42,10 +46,10 @@ AI 응답은 토큰 단위로 받아 JSON 스키마에 맞춰 정리합니다. W
 
 ## 로컬 실행
 
-Node.js가 설치된 환경에서 다음 순서로 실행합니다.
+Node.js 22 LTS 환경에서 다음 순서로 실행합니다. (최소 Node.js 20.9)
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
@@ -56,7 +60,7 @@ npm run dev
 - 한국어: `/`
 - 영어: `/en`
 
-Firebase Hosting의 SPA rewrite 설정으로 각 언어 경로를 같은 정적 빌드에서 제공합니다.
+Next.js App Router의 선택적 catch-all 경로가 기존 SPA와 같은 주소를 제공합니다. 언어 전환, `?lang=en`과 뒤로 가기는 기존 앱 로직을 그대로 사용합니다.
 
 ## 타입 확인과 빌드
 
@@ -65,7 +69,7 @@ npm run typecheck
 npm run build
 ```
 
-빌드 결과물은 `dist` 디렉터리에 생성되며, `firebase.json`의 Hosting publish 디렉터리도 `dist`로 지정되어 있습니다.
+빌드 결과물은 `.next`에 생성됩니다. 기존 `dist`는 현재 Next.js 빌드 결과물이 아닙니다.
 
 빌드된 결과를 로컬에서 확인하려면 다음을 실행합니다.
 
@@ -73,46 +77,38 @@ npm run build
 npm run preview
 ```
 
-## Firebase Hosting 배포
+## Next.js 전환 범위와 배포
 
-이 프로젝트는 **Firebase Hosting만** 사용하도록 구성되어 있습니다. Firebase CLI가 없다면 먼저 설치합니다.
+- `src/app/layout.tsx`: 기존 CSS와 HTML 메타데이터, `#root` 컨테이너를 연결합니다.
+- `src/app/[[...path]]/page.tsx`: 기존 단일 앱과 언어별 주소를 연결합니다.
+- `src/app/original-app.tsx`: 기존 앱을 브라우저에서 실행합니다. 원본이 `window`, 음성 API, 브라우저 현지 날짜를 초기화 시 사용하므로 `next/dynamic`의 `ssr: false`로 기존 동작을 보존합니다.
+- 화면을 서버 렌더링하도록 재작성하거나 입력을 서버로 보내지 않습니다. AI·음성·미리보기·타임라인·공유·인쇄·언어 전환 코드는 원본 그대로입니다.
+- 공개 저장소 **YelloWriter/CareBrifeNextjs**만 갱신합니다. 비공개 **YelloWriter/carebrief** 저장소는 이 작업의 대상이 아닙니다.
+- Vercel: Framework Next.js, Build `npm run build`, Output 기본 자동 감지. main push 후 운영 배포를 확인합니다.
+- 필수 비밀키나 환경 변수는 없습니다. 기존 Supabase 키를 사용하지 않습니다.
+- **carebrief.co.kr의 Firebase Hosting은 기존 Vite 버전을 그대로 유지합니다.** 이 저장소의 `firebase.json`, `.firebaserc`는 기존 배포 참조용이며 이번 전환에서 변경하거나 배포하지 않습니다. 남아 있는 과거 `dist`를 Firebase에 올리지 않습니다.
 
-```bash
-npm install -g firebase-tools
-firebase login
+유료 서비스·요금제 변경은 하지 않습니다.
+
+## 전환 검증 (2026-10-15)
+
+- `npm run build`, `npm run typecheck` 통과.
+- 원본 `6b2effd` 대비 App·CSS·번역·이미지 파일 변경 없음.
+- 같은 날짜·글꼴·모션 조건에서 390/1440px 히어로와 입력 화면 비교: 모바일 2장 차이 0픽셀, 데스크톱 차이 각각 32/201픽셀(0.004% 미만). 전체 화면 문구 일치.
+- 기존 CTA·입력/미리보기·타임라인 추가/삭제·언어 전환 후 입력 유지·뒤로 가기·음성 버튼 시작/종료·정리 대체 경로·인쇄/공유/메일 연결 검사 통과.
+- 마이크·공유·인쇄 API는 모의 이벤트로 연결을 검사했습니다. 실제 음성 인식 품질, 기기 공유 창, 프린터/PDF 저장 성공을 뜻하지 않습니다. WebGPU 모델 다운로드·추론은 이번 전환 검사에 포함하지 않았습니다.
+- 원본의 동작과 레이아웃을 보존합니다. 390px에서 원본과 전환본 모두 문서 너비 408px인 기존 가로 넘침도 임의로 수정하지 않았습니다.
+
+재현하려면 빌드 후 별도 터미널에서 `npm run start`를 실행하고 다음을 실행합니다.
+
+```sh
+npx playwright install chromium
+npm run test:smoke
+# 배포 확인
+TEST_BASE_URL=https://carebrief-iota.vercel.app npm run test:smoke
 ```
 
-현재 기본 Firebase 프로젝트는 `carebrief-co-kr`로 연결되어 있습니다. 다른 Firebase 프로젝트로 복제해 사용할 때는 `.firebaserc`의 프로젝트 ID를 교체합니다.
-
-```json
-{
-  "projects": {
-    "default": "carebrief-co-kr"
-  }
-}
-```
-
-그다음 빌드하고 Hosting으로 배포합니다.
-
-```bash
-npm run build
-firebase deploy --only hosting
-```
-
-### Spark Plan 사용 안내
-
-이 사이트는 **Spark Plan 사용, 결제수단 등록 없이 배포 가능**한 Firebase Hosting 정적 사이트 구조입니다.
-
-Spark Plan은 무료 사용 한도를 넘으면 해당 제품 사용이 중지되며 자동으로 종량제 과금 구간으로 전환되지 않습니다. 이 프로젝트는 결제 계정을 연결하지 않고 Spark Plan을 유지해야 합니다.
-
-과금 가능성을 줄이기 위해 다음 Firebase 기능은 사용하지 않습니다.
-
-- Firestore
-- Cloud Storage
-- Cloud Functions
-- Firebase App Hosting
-
-Firebase Hosting 무료 제공량과 정책은 변경될 수 있으므로 실제 운영 전 Firebase Console의 현재 플랜과 사용량을 확인하세요.
+기존 Chrome을 사용할 경우 `PLAYWRIGHT_CHROMIUM_EXECUTABLE`에 실행 파일 절대 경로를 지정합니다. 검사는 가상 예시만 입력하고 원격 데이터는 저장하지 않습니다.
 
 ## 개인정보 저장 안내
 
@@ -138,7 +134,7 @@ const BETA_FORM_URL =
 
 ## 배포 전 확인
 
-- `.firebaserc`의 Firebase 프로젝트 ID 확인
+- 반영할 GitHub 저장소가 `YelloWriter/CareBrifeNextjs`인지 확인
 - `BETA_FORM_URL`의 Google Forms 링크 확인
 - `npm run typecheck` 통과 확인
 - `npm run build` 통과 확인
