@@ -1,135 +1,148 @@
 # 진료한장
 
-증상·복용약·최근 변화·질문을 진료 전에 정리하는 웹사이트입니다. 진단이나 처방을 제공하지 않습니다.
+부모님과 따로 사는 자녀가 부모님의 증상, 복용약, 최근 변화와 의료진께 묻고 싶은 내용을 정리하고 **A4 한 장 리포트**로 미리 확인하는 검증용 정적 웹사이트입니다.
 
-[공개 GitHub 저장소](https://github.com/YelloWriter/CareBrife) · [사이트 바로 보기](https://carebrief-iota.vercel.app) · [모바일 화면](docs/screenshots/mobile.png) · [데스크톱 화면](docs/screenshots/desktop.png)
+핵심 카피는 “부모님의 진료를 준비하는 가장 다정한 한 장, 진료한장”입니다. 이 서비스는 진단·처방 서비스가 아니라 **진료 전 정보 정리 서비스**입니다.
 
-## 기술 및 실행
+## 주요 기능
 
-- Next.js 16 App Router, React 19, TypeScript
-- Tailwind CSS 4, shadcn/ui (Radix Button·Card), lucide-react
-- Playwright 사용자 흐름 검증, Lighthouse 품질 점검
-- Next.js 정적 내보내기(`output: "export"`) → `out/` → GitHub 연동 Vercel Hosting
-- 별도의 서버 API, 데이터베이스, 유료 AI API 없음
+- 모바일 우선 랜딩페이지와 데스크톱 2단 입력·미리보기 화면
+- 증상, 진료 이력, 복용약, 질문, 가져갈 자료 입력
+- 같은 시기의 사건을 한 행으로 묶는 진료 타임라인
+- 자연어로 길게 적은 이야기를 브라우저 내 무료 AI로 항목별 자동 정리
+- AI 응답을 토큰 단위로 받아 구조화된 항목으로 채우고, AI 실행이 어려운 기기에서는 문장 기준 기본 정리로 자동 전환
+- 한국어, 영어 페이지와 언어별 브라우저 음성 입력
+- 빈 항목을 자동으로 제외하는 A4 한 장 리포트
+- 의료진께 확인할 질문 최대 3개 표시
+- 브라우저 인쇄 기능을 이용한 인쇄 및 PDF 저장
+- 완성한 리포트 내용을 기기의 공유 기능이나 메일 앱으로 보내기
+- 사용자 입력을 서버로 전송하거나 저장하지 않는 브라우저 상태 기반 구조
 
-Node.js 22 LTS와 npm을 권장합니다(최소 Node.js 20.9).
+## 기술 구성
 
-```sh
-git clone https://github.com/YelloWriter/CareBrife.git
-cd CareBrife
-npm ci
+- Vite
+- React
+- TypeScript
+- WebLLM
+- Firebase Hosting
+
+별도 서버, 데이터베이스, 파일 저장소 또는 유료 API를 사용하지 않습니다.
+
+## 무료 AI와 음성 입력
+
+자연어 자동 정리는 `@mlc-ai/web-llm`과 브라우저의 WebGPU를 이용해 사용자 기기 안에서 실행됩니다. 처음 사용할 때 공개 모델 파일을 내려받아 브라우저 캐시에 보관하며, 입력 문장은 외부 LLM API로 전송하지 않습니다.
+
+이 구조에는 API 키, 유료 계정, 결제수단, 사용량 기반 API 호출이 없습니다. 따라서 무료 호출량을 소진해 유료 구간으로 넘어가는 경로 자체가 없습니다. 모델을 내려받을 수 없거나 WebGPU를 지원하지 않는 환경에서는 문장 기준 기본 정리로 전환되며, 사용자는 아래의 수동 입력 화면에서 결과를 계속 고칠 수 있습니다.
+
+AI 응답은 토큰 단위로 받아 JSON 스키마에 맞춰 정리합니다. WebGPU 미지원, 모델 준비 실패 또는 응답 해석 실패가 생기면 입력 문장에서 명시적으로 확인되는 표현을 기준으로 기본 항목을 먼저 채우며, 사용자가 결과를 직접 확인하고 고칠 수 있게 안내합니다.
+
+서비스용 외부 LLM API 토큰은 정적 웹사이트 코드에 넣지 않습니다. 브라우저에 배포되는 API 토큰은 방문자에게 노출될 수 있고, 외부 무료 LLM에 증상·복용약 문장을 보내면 별도의 민감정보 처리 검토와 고지가 필요하기 때문입니다.
+
+음성 입력은 브라우저가 제공하는 `SpeechRecognition` 또는 `webkitSpeechRecognition` 기능을 사용합니다. 진료한장 서버나 별도 음성 API로 녹음 파일을 전송하거나 저장하지 않으며 유료 API 호출도 없습니다. 다만 음성 처리 위치와 보관 정책은 사용 중인 브라우저 제공업체의 정책을 따를 수 있으므로, 민감한 건강정보를 말하기 전에 브라우저의 개인정보 처리 안내를 확인해야 합니다. 음성 인식 미지원, 권한 거부 또는 처리 오류가 발생하면 음성 기능은 즉시 멈추고 직접 입력 방식으로 돌아갑니다.
+
+## 로컬 실행
+
+Node.js가 설치된 환경에서 다음 순서로 실행합니다.
+
+```bash
+npm install
 npm run dev
 ```
 
-`http://localhost:3000`에서 확인합니다. 프로덕션 빌드를 확인하려면 개발 서버를 종료한 뒤:
+화면에 표시되는 로컬 주소를 브라우저에서 열어 확인합니다.
 
-```sh
+언어별 페이지 경로는 다음과 같습니다.
+
+- 한국어: `/`
+- 영어: `/en`
+
+Firebase Hosting의 SPA rewrite 설정으로 각 언어 경로를 같은 정적 빌드에서 제공합니다.
+
+## 타입 확인과 빌드
+
+```bash
 npm run typecheck
 npm run build
+```
+
+빌드 결과물은 `dist` 디렉터리에 생성되며, `firebase.json`의 Hosting publish 디렉터리도 `dist`로 지정되어 있습니다.
+
+빌드된 결과를 로컬에서 확인하려면 다음을 실행합니다.
+
+```bash
 npm run preview
 ```
 
-경로는 `/`(한국어 랜딩), `/en/`(영어 랜딩), `/create/`(새 한국어 작성 흐름)입니다. 랜딩의 ‘진료한장 만들어보기’ 버튼은 같은 페이지의 `#create-report` 섹션으로 부드럽게 스크롤합니다. 작성·수정·완료는 그 섹션 안에서 진행되고 다른 랜딩 섹션을 보아도 입력은 유지됩니다. `/create/`는 작성 화면의 직접 접근 주소로도 유지합니다.
+## Firebase Hosting 배포
 
-`NEXT_PUBLIC_SITE_URL`을 설정하면 소셜 미리보기의 기준 URL을 변경할 수 있습니다. Vercel에서는 제공되는 운영 도메인을 자동으로 사용하고, 로컬에서는 `http://localhost:3000`을 사용합니다. `.env.example`을 참고하세요. 비밀키가 필요한 기능은 없습니다.
+이 프로젝트는 **Firebase Hosting만** 사용하도록 구성되어 있습니다. Firebase CLI가 없다면 먼저 설치합니다.
 
-## 새 작성 흐름
+```bash
+npm install -g firebase-tools
+firebase login
+```
 
-Figma의 390px 디자인 13개를 반응형으로 구현했습니다. 큰 화면에서는 작성 화면을 가운데 배치합니다.
+현재 기본 Firebase 프로젝트는 `carebrief-co-kr`로 연결되어 있습니다. 다른 Firebase 프로젝트로 복제해 사용할 때는 `.firebaserc`의 프로젝트 ID를 교체합니다.
 
-시작 → 말/글 입력 → 정리 → 확인·수정 → 완료 → 크게 보기 / PDF 저장
+```json
+{
+  "projects": {
+    "default": "carebrief-co-kr"
+  }
+}
+```
 
-받아쓰기·정리·PDF 오류에는 재시도와 대체 경로가 있습니다. 직접 작성은 AI 없이도 완료할 수 있습니다. 입력은 새로고침 시 복구되지 않으며, 나가기 버튼은 내용 삭제를 확인합니다. 탭 닫기·새로고침에는 브라우저 기본 경고가 사용됩니다.
+그다음 빌드하고 Hosting으로 배포합니다.
 
-### 자동 정리
-
-WebGPU 지원 기기에서는 기존 WebLLM 공개 모델을 기기에 내려받아 문장을 분류합니다. AI는 문장 번호만 반환하며 원문을 새로 작성하지 않습니다. 모든 문장이 중복 없이 포함됐는지 검사하므로 모델이 병명·날짜·약 정보를 추가하거나 원문을 누락한 결과는 채택하지 않습니다.
-
-WebGPU 미지원 기기에서는 원문 문장을 규칙으로 나누고, 확인 화면에 그 사실을 표시합니다. AI 오류·응답 검증 실패·90초 시간 초과 시에도 원문을 규칙으로 나눠 바로 확인·수정 화면으로 이어집니다. 처음 모델을 내려받는 기기는 다운로드가 오래 걸릴 수 있습니다. 처리 중에도 직접 작성으로 전환할 수 있습니다.
-
-### 음성
-
-같은 마이크 버튼을 한 번 누르면 시작하고 다시 누르면 종료합니다(길게 누르기 아님). 한국어 입력, 경과 시간, 5분 자동 종료, 권한 안내를 지원합니다.
-
-- 기본: 브라우저 SpeechRecognition을 사용합니다. 브라우저 제공업체의 음성 서비스에서 처리될 수 있습니다. 종료 전에 받은 임시 인식 결과도 보존합니다.
-- 연결 실패(`network`, `service-not-allowed`) 또는 API 미지원: MediaRecorder로 **새 녹음을 시작**하고 기기 내 모드임을 안내합니다. 이 안내가 뜬 뒤 다시 말하면 됩니다. 다음 녹음부터는 바로 기기 내 모드를 사용합니다.
-- 기기 내 모드: 녹음 Blob은 메모리에만 두고 16kHz로 변환한 뒤 Web Worker의 Transformers.js + 다국어 Whisper tiny(q8/WASM)로 한국어를 받아씁니다. 음성은 서버로 전송하거나 파일·스토리지에 보관하지 않습니다. 최초 모델·WASM 다운로드에는 인터넷과 시간이 필요하며 모델 파일만 캐시합니다.
-- 받아쓴 글은 원문 기준으로 나눠 바로 확인·수정하도록 표시합니다. 소리가 없는 녹음은 모델에 보내지 않습니다. 녹음 중단·페이지 이탈 시 마이크 트랙을 닫고, 변환 취소·3분 시간 초과 시 worker를 종료합니다.
-
-음성 인식은 오인식할 수 있으므로 날짜·약 이름·증상을 반드시 확인하고 수정해야 합니다. 권한을 거부하면 기기 내 모드도 사용할 수 없으며 글 입력으로 계속할 수 있습니다.
-
-### PDF
-
-‘PDF 저장하기’는 pdf-lib로 **실제 PDF 파일을 생성해 다운로드**합니다. 인쇄 창 지원 여부에 의존하지 않습니다. 한국어 Noto Sans KR 글꼴을 포함하며, A4 크기에 원문·작성일·페이지 번호를 배치합니다. 긴 내용은 잘라내지 않고 다음 페이지로 이어집니다.
-
-문서는 브라우저 메모리 안에서 만들고 서버에 전송하지 않습니다. 파일 생성 중 중복 요청을 막고, 생성 후 ‘PDF 파일 다시 받기’와 ‘PDF 열기’ 링크를 남깁니다. 앱은 기기에 파일이 저장됐는지 확인할 수 없으므로 파일을 준비했다고만 표시합니다. 내용 수정·이탈 시 임시 Blob URL을 해제하며 생성 중 나가면 요청을 취소합니다. 글꼴·이미지 로딩 실패 시 내용은 그대로 유지하고 다시 저장할 수 있습니다. PDF 글꼴이 지원하지 않는 문자는 임의로 누락하지 않고 수정 안내를 표시합니다.
-
-글꼴: [Google Fonts Noto Sans KR](https://github.com/google/fonts/tree/main/ofl/notosanskr)의 가변 TTF를 fontTools로 weight 400에 고정했습니다. `public/fonts/OFL-NotoSansKR.txt`에 SIL Open Font License를 포함합니다. 글꼴과 PDF 라이브러리는 저장 요청 시 로드합니다. 브라우저의 일반 인쇄를 위한 CSS도 유지합니다.
-
-## 검증
-
-```sh
-npx playwright install chromium
+```bash
 npm run build
-npm test
+firebase deploy --only hosting
 ```
 
-기존 Chromium을 사용하려면 `PLAYWRIGHT_CHROMIUM_EXECUTABLE`에 실행 파일의 절대 경로를 지정합니다. 테스트는 빌드 결과를 제공하는 정적 서버를 시작하거나 실행 중인 3000번 포트 서버를 사용합니다. `TEST_BASE_URL`로 배포 URL을 지정하면 로컬 서버 없이 해당 배포를 검사합니다.
+### Spark Plan 사용 안내
 
-테스트 범위: 랜딩 CTA, 글 입력·수정·완료·읽기, 빈 입력 차단, 원문 보존과 모델 결과 검증, 음성 미지원 대체, 모의 음성 이벤트와 5분 종료, 처리 시간 초과 복구, PDF 오류, 나가기 대화상자, 뒤로 가기, 모바일/데스크톱 넘침, 영어 랜딩, 실제 PDF 다운로드·한글 및 페이지 나눔·재시도·생성 취소. 실제 마이크 인식 품질과 실제 기기의 WebGPU 모델 다운로드·추론은 별도 기기 확인이 필요합니다.
+이 사이트는 **Spark Plan 사용, 결제수단 등록 없이 배포 가능**한 Firebase Hosting 정적 사이트 구조입니다.
 
-음성 회귀 검사에는 서비스 연결 실패→기기 내 녹음→확인·완료, 마이크 해제, worker 취소, 권한 거부, 무음 차단이 포함됩니다. `LOCAL_ASR_FIXTURE=/absolute/path/synthetic-korean.wav npm test -- tests/local-speech.spec.ts`로 실제 WASM 모델까지 검증합니다. 해당 선택 검사는 **합성 한국어 음성 파일**을 사용하고 모델을 다운로드하므로 기본 CI에서는 생략합니다. 사용자 음성·건강정보를 테스트 파일로 저장하지 않습니다.
+Spark Plan은 무료 사용 한도를 넘으면 해당 제품 사용이 중지되며 자동으로 종량제 과금 구간으로 전환되지 않습니다. 이 프로젝트는 결제 계정을 연결하지 않고 Spark Plan을 유지해야 합니다.
 
-디자인 대응표와 검증 기록: [docs/implementation.md](docs/implementation.md).
+과금 가능성을 줄이기 위해 다음 Firebase 기능은 사용하지 않습니다.
 
-## 배포
+- Firestore
+- Cloud Storage
+- Cloud Functions
+- Firebase App Hosting
 
-- GitHub: https://github.com/YelloWriter/CareBrife
-- Vercel 배포 URL: **https://carebrief-iota.vercel.app**
-- Framework Preset: Next.js / Root Directory: 저장소 루트 / Build: `npm run build`
-- Output Directory: Vercel 기본 자동 감지. Next 정적 export 설정이 `out/`을 생성합니다.
-- 필수 환경변수 없음. 커스텀 도메인은 `NEXT_PUBLIC_SITE_URL`에 공개 origin을 지정합니다.
+Firebase Hosting 무료 제공량과 정책은 변경될 수 있으므로 실제 운영 전 Firebase Console의 현재 플랜과 사용량을 확인하세요.
 
-Vercel에서 위 GitHub 저장소를 Import하고 운영 브랜치를 `main`으로 지정합니다. 이후 GitHub의 `main` 변경이 자동으로 운영에 배포됩니다. 다른 브랜치는 미리보기 배포에 사용합니다. 제출 저장소는 **Public**이며 별도 GitHub 초대 없이 열람할 수 있습니다.
+## 개인정보 저장 안내
 
-기존 커스텀 도메인 **https://carebrief.co.kr**도 동일한 Next.js 코드를 Firebase Hosting에서 제공합니다. Firebase 프로젝트·사이트는 `carebrief-co-kr`이며, 기존 저장소는 [YelloWriter/carebrief](https://github.com/YelloWriter/carebrief)입니다. 두 저장소의 최신 코드를 동기화했습니다.
+- 입력한 정보는 현재 브라우저의 React 상태에서 리포트 미리보기를 만드는 동안만 사용됩니다.
+- 입력값을 서버로 전송하거나 Firebase에 저장하는 코드가 없습니다.
+- 자연어 AI 정리는 브라우저 안에서 실행되며 외부 LLM API에 입력값을 보내지 않습니다.
+- 음성 입력은 진료한장 서버나 별도 유료 API를 사용하지 않지만, 브라우저 제공업체의 음성 처리 정책이 적용될 수 있습니다.
+- 페이지를 새로고침하면 입력한 내용은 사라집니다.
+- 공유하기나 메일 보내기는 사용자가 버튼을 누를 때만 기기의 공유 기능 또는 메일 앱으로 리포트 내용을 전달합니다.
+- 민감한 건강정보를 입력하기 전에 실제 운영 주체의 개인정보 처리 방식을 반드시 안내해야 합니다.
+- 본 서비스는 진단이나 처방을 제공하지 않습니다.
 
-Vercel은 GitHub push로 자동 배포됩니다. Firebase는 CLI로 별도 배포하므로 **기존 저장소에 push만 해서는 도메인 화면이 바뀌지 않습니다.** 로그인된 Firebase 계정에서 아래 명령으로 도메인용 메타데이터까지 빌드합니다.
+## Google Forms 링크
 
-```sh
-NEXT_PUBLIC_SITE_URL=https://carebrief.co.kr npm run build
-npx firebase-tools@15.31.0 deploy --only hosting --project carebrief-co-kr
+베타테스터 버튼은 현재 아래 Google Forms 공유 링크에 연결되어 있습니다.
+
+```ts
+const BETA_FORM_URL =
+  "https://docs.google.com/forms/d/e/1FAIpQLSdv7-MYk37xpZkBIXTOJsZLTyOBeV0_8FSu5pX_eRMaf_SwUA/viewform?usp=header";
 ```
 
-페이지·고정 이름 자산은 매번 재검증하고 해시가 붙은 `/_next/static/` 자산만 장기 캐시합니다. [기존 도메인 배포 기록](docs/firebase-domain.md)을 참고하세요.
+다른 설문으로 변경할 때는 `src/App.tsx` 상단의 `BETA_FORM_URL` 값만 새 공유 링크로 교체합니다. 버튼은 새 탭에서 Google Forms를 열며, 베타테스터 신청은 유료 가입이나 결제가 아닙니다.
 
-베타 신청 링크는 기존 `src/components/landing/shared.tsx`의 `BETA_FORM_URL`을 사용합니다. 입력 내용은 React 메모리에만 있으며 localStorage, sessionStorage, 서버 로그 또는 DB에 기록하지 않습니다. 다운로드된 모델 자산은 WebLLM이 브라우저에 캐시할 수 있습니다.
+## 배포 전 확인
 
-## 이용 방법 일러스트
-
-네 단계의 그림은 내장 imagegen 도구로 생성한 투명 배경 이미지입니다. `public/illustrations/`의 WebP 자산을 사용하며, 말하기 파형·확인 체크·문서 모으기·리포트 전달을 각각 다른 CSS 애니메이션으로 표현합니다. 화면 밖에서는 멈추며 사용자가 일시 정지하거나 기기의 동작 줄이기 설정을 적용할 수 있습니다. 원본 생성 프롬프트와 자산 경로는 [docs/illustrations.md](docs/illustrations.md)에 있습니다.
-
-## AI 작업 맥락과 제출 기록
-
-- [AGENTS.md](AGENTS.md): 목적·기술·디자인·개인정보 경계·작업 및 검증 규칙
-- [CLAUDE.md](CLAUDE.md): Claude 시작점
-- [docs/ui-system.md](docs/ui-system.md): Tailwind·shadcn 출처와 재사용 구조
-- [docs/implementation.md](docs/implementation.md): Figma 13개 화면 대응·원본과의 차이 및 보정
-- [docs/submission.md](docs/submission.md): 제출 체크리스트·검증 결과·배포 증적
-
-언어 전환은 `/`와 `/en/` 사이를 이동합니다. 작성 중이라면 브라우저의 나가기 경고가 표시되며, 실제로 이동하면 메모리의 초안이 사라집니다.
-
-Lighthouse: `npm run audit:lighthouse` (먼저 빌드·미리보기 실행). 결과는 `.lighthouse/`에 저장합니다. `AUDIT_URL`로 배포 URL도 검사할 수 있습니다.
-
-## 구현한 인터랙션과 모션
-
-- **페이지 안 CTA 이동:** 헤더와 히어로에서 작성 섹션으로 부드럽게 이동하고 작성 중 초안을 유지합니다.
-- **스크롤 등장:** 섹션 제목과 카드를 18px 올리며 나타내고, 같은 그룹은 60ms 간격으로 차례로 표시합니다. 한 번 보인 콘텐츠는 다시 숨기지 않습니다.
-- **접근성:** 키보드로 포커스한 콘텐츠는 즉시 표시하고, OS의 `prefers-reduced-motion` 변경도 실시간으로 반영합니다. JavaScript가 꺼져도 랜딩 정보는 보입니다.
-- **네 단계 일러스트:** 말하기·확인·정리·진료실 전달 모션, 화면 밖 정지 및 사용자의 일시 정지.
-- **작성 도구:** 녹음 시작/종료 토글, 글 입력, 내용 수정, 권한 안내 모달, 크게 보기, PDF 다운로드·재시도, 나가기 확인.
-- **FAQ와 언어 전환:** 키보드로 펼칠 수 있는 질문 목록, 한국어/영어 랜딩.
-
-최신 Lighthouse 측정 조건·점수·개선 내용은 [품질 점검 기록](docs/lighthouse.md)에 있습니다. 점수는 실험실 측정값이며 실제 사용자 환경에 따라 달라집니다. `AUDIT_URL=https://carebrief-iota.vercel.app AUDIT_OUTPUT_DIR=.lighthouse/production npm run audit:lighthouse`로 재측정할 수 있습니다. 브라우저를 자동으로 찾지 못하면 `PLAYWRIGHT_CHROMIUM_EXECUTABLE`에 Chrome 실행 파일 경로를 지정하세요.
-
-2026-09-28 운영 사이트 Lighthouse 3회 측정 중앙값: **모바일 성능 97(94–99), 데스크톱 성능 100**, 접근성·권장사항·SEO는 두 환경 모두 **100**입니다. 자세한 수치와 남은 최적화 후보는 위 품질 점검 기록에서 확인할 수 있습니다.
+- `.firebaserc`의 Firebase 프로젝트 ID 확인
+- `BETA_FORM_URL`의 Google Forms 링크 확인
+- `npm run typecheck` 통과 확인
+- `npm run build` 통과 확인
+- WebGPU 지원 브라우저에서 자연어 자동 정리 확인
+- 음성 입력 지원 브라우저에서 마이크 권한, 시작, 중지 흐름 확인
+- 실제 모바일 화면에서 입력 → 미리보기 → 인쇄 흐름 확인
+- 브라우저 인쇄 화면에서 A4 한 장 출력 확인

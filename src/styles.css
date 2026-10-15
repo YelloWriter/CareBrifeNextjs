@@ -1,33 +1,13 @@
-@layer theme, base, components, utilities;
-@import "tailwindcss/theme.css" layer(theme);
-@import "tailwindcss/utilities.css" layer(utilities);
-
-@theme inline {
-  --color-background: #f8f7f3;
-  --color-foreground: #33445e;
-  --color-card: #fffefa;
-  --color-card-foreground: #33445e;
-  --color-primary: #536db6;
-  --color-primary-foreground: #ffffff;
-  --color-secondary: #eef2fb;
-  --color-secondary-foreground: #33445e;
-  --color-accent: #eaf7fb;
-  --color-accent-foreground: #173f78;
-  --color-muted-foreground: #5b687c;
-  --color-border: #dbe1ec;
-  --color-input: #dbe1ec;
-  --color-ring: #536db6;
-  --color-destructive: #bd3543;
-}
+@import url("https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap");
 
 :root {
-  font-family: "Noto Sans KR Variable", -apple-system, BlinkMacSystemFont, "Segoe UI",
+  font-family: "Noto Sans KR", -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
   color: #33445e;
   background: #f8f7f3;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
-  --display-font: "Gowun Dodum", "Noto Sans KR Variable", sans-serif;
+  --display-font: "Gowun Dodum", "Noto Sans KR", sans-serif;
   --ink: #173f78;
   --muted: #6d7785;
   --line: #dbe1ec;
@@ -680,6 +660,7 @@ a {
   background: rgba(255, 254, 250, 0.72);
   box-shadow: 0 10px 30px rgba(35, 53, 84, 0.045);
   backdrop-filter: blur(9px);
+  animation: hero-copy-arrive 720ms 80ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .language-option {
@@ -741,6 +722,7 @@ a {
   line-height: 1.42;
   letter-spacing: -0.065em;
   word-break: keep-all;
+  animation: hero-copy-arrive 820ms 170ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .hero-composed h1 span {
@@ -765,6 +747,7 @@ a {
   font-size: clamp(18px, 1.65vw, 25px);
   line-height: 1.65;
   letter-spacing: -0.04em;
+  animation: hero-copy-arrive 820ms 250ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .hero-composed-description {
@@ -775,10 +758,12 @@ a {
   line-height: 1.85;
   letter-spacing: -0.025em;
   word-break: keep-all;
+  animation: hero-copy-arrive 820ms 310ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .hero-composed-actions {
   margin-top: clamp(24px, 2.6vw, 36px);
+  animation: hero-copy-arrive 820ms 370ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .hero-composed-notice {
@@ -786,6 +771,7 @@ a {
   margin-top: 17px;
   padding-top: 15px;
   border-top: 1px solid rgba(211, 218, 229, 0.9);
+  animation: hero-copy-arrive 820ms 430ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .hero-paper-stage {
@@ -1068,10 +1054,10 @@ a {
 
 .scroll-reveal {
   opacity: 0;
-  transform: translate3d(0, 18px, 0);
+  transform: translate3d(0, 26px, 0);
   transition:
-    opacity 480ms ease var(--reveal-delay, 0ms),
-    transform 600ms cubic-bezier(0.22, 1, 0.36, 1)
+    opacity 680ms ease var(--reveal-delay, 0ms),
+    transform 760ms cubic-bezier(0.22, 1, 0.36, 1)
       var(--reveal-delay, 0ms);
 }
 
@@ -1094,6 +1080,17 @@ a {
   }
 }
 
+@keyframes hero-copy-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
 @keyframes paper-shadow-breathe {
   from {
@@ -1284,7 +1281,7 @@ a {
   margin: 0 auto;
 }
 
-.value-grid [data-slot="card"] {
+.value-grid article {
   min-height: 280px;
   padding: 34px;
   border: 1px solid #dce2ee;
@@ -1295,7 +1292,7 @@ a {
     box-shadow 240ms ease;
 }
 
-.value-grid [data-slot="card"]:hover {
+.value-grid article:hover {
   transform: translateY(-6px);
   box-shadow: 0 24px 54px rgba(42, 61, 98, 0.1);
 }
@@ -1304,7 +1301,7 @@ a {
   transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.value-grid [data-slot="card"]:hover .value-icon {
+.value-grid article:hover .value-icon {
   transform: rotate(7deg) scale(1.07);
 }
 
@@ -3288,7 +3285,7 @@ a {
 .site-footer p,
 .site-footer span {
   margin: 0;
-  color: #596b72;
+  color: #77898e;
   font-size: 11px;
 }
 
@@ -3440,7 +3437,7 @@ a {
     max-width: 680px;
   }
 
-  .value-grid [data-slot="card"] {
+  .value-grid article {
     min-height: 0;
   }
 
@@ -3712,7 +3709,7 @@ a {
     text-align: left;
   }
 
-  .value-grid [data-slot="card"] {
+  .value-grid article {
     padding: 28px 24px;
   }
 
