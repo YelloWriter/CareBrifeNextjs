@@ -138,6 +138,25 @@ TEST_BASE_URL=https://carebrief-iota.vercel.app npm run test:smoke
 
 기존 Chrome을 사용할 경우 `PLAYWRIGHT_CHROMIUM_EXECUTABLE`에 실행 파일 절대 경로를 지정합니다. 검사는 가상 예시만 입력하고 원격 데이터는 저장하지 않습니다.
 
+## FAQ 검증 (2026-10-16)
+
+로컬 프로덕션 빌드와 로컬 Chrome에서 확인했습니다. 성공으로 표시한 항목만 실행했습니다.
+
+- [x] `npm run typecheck`
+- [x] `npm run build`
+- [x] `npm run test:smoke`. 기존 입력, 타임라인, 언어 전환, 인쇄·공유·음성 버튼 연결을 확인했습니다. 인쇄, 공유, 마이크는 브라우저 API를 모의했습니다. 홈 FAQ 8개는 로컬 서버 `/api/faqs`가 Supabase에 게시된 행을 읽어 온 실제 조회입니다.
+- [x] 홈에서 FAQ 순서와 첫 답변 열기, 영어 화면의 DOM 번역, 390px 화면.
+- [x] `/api/faqs` 요청을 브라우저에서 끊었을 때 리포트 입력은 계속 동작합니다. 이것은 네트워크 차단 모의이며, Supabase 장애를 재현한 것은 아닙니다.
+- [x] publishable key로 게시 FAQ 8건 조회, 비공개 조건 0건, 공개 키 INSERT 거부, 공개 키 PDF 업로드는 RLS에서 거부.
+- [x] 빌드된 클라이언트 정적 파일에 `SUPABASE_SECRET_KEY`와 publishable key 값이 없습니다.
+- [x] Admin 빈 값·길이·순서 검증 문구, 텍스트 파일 거부, 2MB 초과 PDF 거부, 비밀키가 없을 때 저장 실패와 입력 유지, 잘못된 id의 404, `/admin`에서 `/admin/faqs`로 이동.
+
+아직 확인하지 않았습니다.
+
+- [ ] Vercel Preview 배포의 홈 FAQ와 Admin CRUD
+- [ ] `SUPABASE_SECRET_KEY`가 있는 상태의 등록, 수정, 삭제, 검색, 필터, 정렬, 페이지 이동
+- [ ] 참고자료 업로드, 교체, FAQ 삭제 시 파일 정리, 서명 URL 미리보기와 삭제 확인 창
+
 ## 개인정보 저장 안내
 
 - 입력한 정보는 현재 브라우저의 React 상태에서 리포트 미리보기를 만드는 동안만 사용됩니다.
