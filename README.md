@@ -151,11 +151,12 @@ TEST_BASE_URL=https://carebrief-iota.vercel.app npm run test:smoke
 - [x] 빌드된 클라이언트 정적 파일에 `SUPABASE_SECRET_KEY`와 publishable key 값이 없습니다.
 - [x] Admin 빈 값·길이·순서 검증 문구, 텍스트 파일 거부, 2MB 초과 PDF 거부, 비밀키가 없을 때 저장 실패와 입력 유지, 잘못된 id의 404, `/admin`에서 `/admin/faqs`로 이동.
 
-아직 확인하지 않았습니다.
+`feature/faq-crud` Preview `https://carebrief-git-feature-faq-crud-tom-f7d5.vercel.app`에서 확인했습니다. Production과 `carebrief.co.kr`은 열지 않았습니다. 테스트로 만든 FAQ와 파일은 삭제했고, 처음 넣은 8개는 그대로입니다.
 
-- [ ] Vercel Preview 배포의 홈 FAQ와 Admin CRUD
-- [ ] `SUPABASE_SECRET_KEY`가 있는 상태의 등록, 수정, 삭제, 검색, 필터, 정렬, 페이지 이동
-- [ ] 참고자료 업로드, 교체, FAQ 삭제 시 파일 정리, 서명 URL 미리보기와 삭제 확인 창
+- [x] Preview에서 등록, 수정, 삭제. 질문 검색, 공개 필터, 최근 수정 정렬, 10개 단위 페이지와 마지막 페이지의 마지막 항목 삭제.
+- [x] PNG 업로드, 서명 URL로 열기, PDF로 교체. 교체 직후 저장소에는 새 PDF만 남았고, 테스트 FAQ를 삭제한 뒤 `faq-attachments` 객체는 0건이었습니다. 삭제 확인 문구도 확인했습니다.
+- [x] 홈에는 원래 8개 질문과 순서가 유지되고, 비공개로 만든 질문은 보이지 않았습니다. 그 상태에서도 리포트 입력이 동작했습니다.
+- [x] Preview에서 `/api/faqs` 요청을 끊었을 때 리포트 입력, 베타테스터 링크, 음성 버튼, AI 대체 정리가 동작했습니다. 음성과 AI는 브라우저 API를 모의했고, 실제 마이크나 모델 추론은 아닙니다.
 
 ## 개인정보 저장 안내
 
