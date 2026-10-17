@@ -351,6 +351,12 @@ const copy: Record<string, LocalizedCopy> = {
   "자주 묻는 질문": {
     en: "Frequently asked questions",
   },
+  "자주 묻는 질문을 불러오는 중": {
+    en: "Loading questions",
+  },
+  "자주 묻는 질문을 불러오지 못했어요.": {
+    en: "The questions could not be loaded.",
+  },
   "진료한장은 병을 진단해주는 서비스인가요?": {
     en: "Does Jinryo Hanjang diagnose conditions?",
   },

@@ -2,7 +2,7 @@
 
 [GitHub](https://github.com/YelloWriter/CareBrifeNextjs) · [Next.js 배포](https://carebrief-iota.vercel.app/)
 
-현재 화면·문구·기능을 그대로 유지하고 실행 환경만 Next.js App Router로 전환한 저장소입니다. 원본 기준은 `6b2effd`이며, `src/App.tsx`, `src/styles.css`, `src/i18n.ts`, `public/`은 수정하지 않습니다. 새 화면·기능·데이터 저장소를 추가하지 않습니다.
+현재 화면·문구·기능을 그대로 유지하고 실행 환경만 Next.js App Router로 전환한 저장소입니다. 원본 기준은 `6b2effd`입니다. 2026-10-16 요청으로, 이미 있던 자주 묻는 질문만 Supabase에서 관리합니다. 증상 입력, AI, 음성, 타임라인, 리포트, 인쇄, 공유, 베타 신청은 이전과 같습니다.
 
 부모님과 따로 사는 자녀가 부모님의 증상, 복용약, 최근 변화와 의료진께 묻고 싶은 내용을 정리하고 **A4 한 장 리포트**로 미리 확인하는 검증용 정적 웹사이트입니다.
 
@@ -29,8 +29,36 @@
 - TypeScript
 - WebLLM
 - Vercel
+- Supabase: FAQ 테이블 `faqs`, 비공개 버킷 `faq-attachments`
 
-Next.js는 페이지 실행과 배포를 담당합니다. 데이터베이스, 파일 저장소 또는 유료 API를 추가하지 않았으며 기존 입력은 브라우저 메모리 안에서만 처리합니다.
+Next.js는 페이지 실행과 배포를 담당합니다. 진료 입력은 브라우저 메모리 안에서만 처리합니다. Supabase에는 FAQ 문장과 관리용 참고자료만 저장하며, 이름·연락처·증상·복용약·리포트 같은 개인정보와 건강정보는 저장하지 않습니다.
+
+## FAQ
+
+홈의 자주 묻는 질문은 `is_published = true`인 행만 `sort_order`, `created_at` 순으로 보여 줍니다. 기존 `faq-section` / `faq-list`와 `<details>` / `<summary>` 구조를 유지합니다. 조회에 실패해도 FAQ 영역만 안내하고, 리포트·입력·음성·베타 신청은 그대로 동작합니다.
+
+관리 화면은 다음 주소입니다.
+
+- `/admin/faqs`
+- `/admin/faqs/new`
+- `/admin/faqs/[id]`
+- `/admin/faqs/[id]/edit`
+
+목록은 질문 검색(`q`), 공개 필터(`status=published|unpublished`), 정렬(`sort=order|updated_desc`), 10개 단위 페이지(`page`)를 지원합니다. 등록·수정·삭제와 참고자료 교체는 서버에서 검증합니다. 참고자료는 PDF, JPEG, PNG, WEBP이며 2MB 이하입니다. 이 파일은 홈에 표시하지 않습니다.
+
+Admin 화면에는 로그인 절차가 없습니다. 확인은 Vercel Preview에서 하고, 인증이나 별도의 접근 제어를 넣기 전에는 Production 관리 화면으로 쓰지 않습니다. `main`에 바로 합치지 않습니다.
+
+환경 변수 이름만 사용합니다. 값은 GitHub, README, 코드에 적지 않습니다.
+
+```
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+SUPABASE_SECRET_KEY=
+```
+
+`SUPABASE_SECRET_KEY`는 서버 전용입니다. `NEXT_PUBLIC_SUPABASE_SECRET_KEY`처럼 브라우저로 전달되는 이름은 사용하지 않습니다. 로컬에서는 `.env.local`에 넣고, Vercel에서는 같은 이름의 Environment Variables를 Preview에 넣습니다. 이름 예시만 `.env.example`에 있습니다.
+
+공개 조회는 publishable key와 RLS를 사용합니다. 공개 역할은 게시된 FAQ를 읽기만 할 수 있습니다. 등록·수정·삭제는 서버의 secret key로 처리합니다.
 
 ## 무료 AI와 음성 입력
 
@@ -84,8 +112,8 @@ npm run preview
 - `src/app/original-app.tsx`: 기존 앱을 브라우저에서 실행합니다. 원본이 `window`, 음성 API, 브라우저 현지 날짜를 초기화 시 사용하므로 `next/dynamic`의 `ssr: false`로 기존 동작을 보존합니다.
 - 화면을 서버 렌더링하도록 재작성하거나 입력을 서버로 보내지 않습니다. AI·음성·미리보기·타임라인·공유·인쇄·언어 전환 코드는 원본 그대로입니다.
 - 공개 저장소 **YelloWriter/CareBrifeNextjs**만 갱신합니다. 비공개 **YelloWriter/carebrief** 저장소는 이 작업의 대상이 아닙니다.
-- Vercel: Framework Next.js, Build `npm run build`, Output 기본 자동 감지. main push 후 운영 배포를 확인합니다.
-- 필수 비밀키나 환경 변수는 없습니다. 기존 Supabase 키를 사용하지 않습니다.
+- Vercel 프로젝트 `carebrief`를 재사용합니다. Framework Next.js, Build `npm run build`. FAQ 확인은 Preview 배포에서 하고, Production 도메인이나 `carebrief.co.kr`은 이 작업에서 바꾸지 않습니다.
+- Preview에 `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`가 있어야 홈 FAQ와 Admin 저장이 동작합니다. Production에 예전에 있던 `SUPABASE_URL` 이름은 이 기능에서 읽지 않습니다.
 - **carebrief.co.kr의 Firebase Hosting은 기존 Vite 버전을 그대로 유지합니다.** 이 저장소의 `firebase.json`, `.firebaserc`는 기존 배포 참조용이며 이번 전환에서 변경하거나 배포하지 않습니다. 남아 있는 과거 `dist`를 Firebase에 올리지 않습니다.
 
 유료 서비스·요금제 변경은 하지 않습니다.
@@ -109,6 +137,26 @@ TEST_BASE_URL=https://carebrief-iota.vercel.app npm run test:smoke
 ```
 
 기존 Chrome을 사용할 경우 `PLAYWRIGHT_CHROMIUM_EXECUTABLE`에 실행 파일 절대 경로를 지정합니다. 검사는 가상 예시만 입력하고 원격 데이터는 저장하지 않습니다.
+
+## FAQ 검증 (2026-10-16)
+
+로컬 프로덕션 빌드와 로컬 Chrome에서 확인했습니다. 성공으로 표시한 항목만 실행했습니다.
+
+- [x] `npm run typecheck`
+- [x] `npm run build`
+- [x] `npm run test:smoke`. 기존 입력, 타임라인, 언어 전환, 인쇄·공유·음성 버튼 연결을 확인했습니다. 인쇄, 공유, 마이크는 브라우저 API를 모의했습니다. 홈 FAQ 8개는 로컬 서버 `/api/faqs`가 Supabase에 게시된 행을 읽어 온 실제 조회입니다.
+- [x] 홈에서 FAQ 순서와 첫 답변 열기, 영어 화면의 DOM 번역, 390px 화면.
+- [x] `/api/faqs` 요청을 브라우저에서 끊었을 때 리포트 입력은 계속 동작합니다. 이것은 네트워크 차단 모의이며, Supabase 장애를 재현한 것은 아닙니다.
+- [x] publishable key로 게시 FAQ 8건 조회, 비공개 조건 0건, 공개 키 INSERT 거부, 공개 키 PDF 업로드는 RLS에서 거부.
+- [x] 빌드된 클라이언트 정적 파일에 `SUPABASE_SECRET_KEY`와 publishable key 값이 없습니다.
+- [x] Admin 빈 값·길이·순서 검증 문구, 텍스트 파일 거부, 2MB 초과 PDF 거부, 비밀키가 없을 때 저장 실패와 입력 유지, 잘못된 id의 404, `/admin`에서 `/admin/faqs`로 이동.
+
+`feature/faq-crud` Preview `https://carebrief-git-feature-faq-crud-tom-f7d5.vercel.app`에서 확인했습니다. Production과 `carebrief.co.kr`은 열지 않았습니다. 테스트로 만든 FAQ와 파일은 삭제했고, 처음 넣은 8개는 그대로입니다.
+
+- [x] Preview에서 등록, 수정, 삭제. 질문 검색, 공개 필터, 최근 수정 정렬, 10개 단위 페이지와 마지막 페이지의 마지막 항목 삭제.
+- [x] PNG 업로드, 서명 URL로 열기, PDF로 교체. 교체 직후 저장소에는 새 PDF만 남았고, 테스트 FAQ를 삭제한 뒤 `faq-attachments` 객체는 0건이었습니다. 삭제 확인 문구도 확인했습니다.
+- [x] 홈에는 원래 8개 질문과 순서가 유지되고, 비공개로 만든 질문은 보이지 않았습니다. 그 상태에서도 리포트 입력이 동작했습니다.
+- [x] Preview에서 `/api/faqs` 요청을 끊었을 때 리포트 입력, 베타테스터 링크, 음성 버튼, AI 대체 정리가 동작했습니다. 음성과 AI는 브라우저 API를 모의했고, 실제 마이크나 모델 추론은 아닙니다.
 
 ## 개인정보 저장 안내
 

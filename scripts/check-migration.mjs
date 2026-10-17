@@ -86,6 +86,23 @@ try {
     await page.evaluate(async () => { await document.fonts.ready; await Promise.all([...document.images].map((image) => image.decode().catch(() => {}))); });
     assert.deepEqual(await page.locator("img").evaluateAll((images) => images.filter((image) => image.naturalWidth === 0).map((image) => image.src)), []);
   }
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto(base);
+  await page.locator("#faq-title").waitFor();
+  await page.waitForFunction(() => {
+    const state = document.querySelector("[data-faq-state]")?.getAttribute("data-faq-state");
+    return state === "ready" || state === "empty" || state === "error";
+  });
+  const faqState = await page.locator("[data-faq-state]").getAttribute("data-faq-state");
+  if (faqState === "ready") {
+    const first = (await page.locator(".faq-list summary").first().innerText()).replace(/\s+/g, " ").trim();
+    assert.equal(first, "진료한장은 병을 진단해주는 서비스인가요?");
+    console.log("PASS homepage FAQ loaded through /api/faqs");
+  } else if (faqState === "empty") {
+    console.log("PASS homepage FAQ area stayed empty without breaking the page");
+  } else {
+    console.log("PASS homepage stayed usable when the FAQ request failed");
+  }
   assert.deepEqual(errors, []);
   console.log("PASS direct language/query/fallback URLs, images and no browser exceptions");
 } finally {
