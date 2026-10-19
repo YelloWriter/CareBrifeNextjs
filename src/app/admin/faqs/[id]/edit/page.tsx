@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { requireAdminSession } from "../../../../../lib/admin/session";
 import { updateFaq } from "../../../../../lib/faqs/actions";
 import { getAdminFaq } from "../../../../../lib/faqs/queries";
 import { FaqConfigError, FaqQueryError } from "../../../../../lib/faqs/types";
@@ -17,6 +18,7 @@ export default async function EditFaqPage({
   params: Promise<{ id: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  await requireAdminSession();
   const { id } = await params;
   if (!isFaqId(id)) notFound();
   const raw = await searchParams;
