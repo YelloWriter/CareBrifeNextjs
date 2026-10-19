@@ -38,6 +38,10 @@
   gap: 8px;
 }
 
+.nav form {
+  display: contents;
+}
+
 .nav a,
 .button,
 .buttonPrimary,

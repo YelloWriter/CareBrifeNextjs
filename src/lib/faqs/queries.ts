@@ -2,6 +2,7 @@ import "server-only";
 import { FAQ_PAGE_SIZE } from "./constants";
 import type { FaqListQuery, FaqRecord, PublicFaq } from "./types";
 import { FaqConfigError, FaqQueryError } from "./types";
+import { requireAdminSession } from "../admin/session";
 import { createAdminSupabase } from "../supabase/admin";
 import { createPublicSupabase } from "../supabase/public";
 
@@ -26,6 +27,7 @@ export async function listPublishedFaqs(): Promise<PublicFaq[]> {
 }
 
 export async function listAdminFaqs(query: FaqListQuery) {
+  await requireAdminSession();
   const supabase = createAdminSupabase();
   if (!supabase) throw new FaqConfigError();
   let request = supabase.from("faqs").select(faqColumns, { count: "exact" });
@@ -43,6 +45,7 @@ export async function listAdminFaqs(query: FaqListQuery) {
 }
 
 export async function getAdminFaq(id: string) {
+  await requireAdminSession();
   const supabase = createAdminSupabase();
   if (!supabase) throw new FaqConfigError();
   const { data, error } = await supabase.from("faqs").select(faqColumns).eq("id", id).maybeSingle();
@@ -51,6 +54,7 @@ export async function getAdminFaq(id: string) {
 }
 
 export async function nextSortOrder() {
+  await requireAdminSession();
   const supabase = createAdminSupabase();
   if (!supabase) throw new FaqConfigError();
   const { data, error } = await supabase

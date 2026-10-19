@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { requireAdminSession } from "../../../lib/admin/session";
 import { FAQ_PAGE_SIZE } from "../../../lib/faqs/constants";
 import { listAdminFaqs } from "../../../lib/faqs/queries";
 import { FaqConfigError, FaqQueryError } from "../../../lib/faqs/types";
@@ -16,6 +17,7 @@ export default async function FaqListPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  await requireAdminSession();
   const raw = await searchParams;
   const query = parseFaqListQuery({
     q: one(raw.q),

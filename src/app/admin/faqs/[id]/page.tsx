@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { requireAdminSession } from "../../../../lib/admin/session";
 import { deleteFaq } from "../../../../lib/faqs/actions";
 import { getAdminFaq } from "../../../../lib/faqs/queries";
 import { createFaqAttachmentUrl } from "../../../../lib/faqs/storage";
@@ -21,6 +22,7 @@ export default async function FaqDetailPage({
   params: Promise<{ id: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  await requireAdminSession();
   const { id } = await params;
   if (!isFaqId(id)) notFound();
   const raw = await searchParams;

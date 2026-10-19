@@ -1,3 +1,4 @@
+import { requireAdminSession } from "../../../../lib/admin/session";
 import { createFaq } from "../../../../lib/faqs/actions";
 import { nextSortOrder } from "../../../../lib/faqs/queries";
 import { FaqConfigError, FaqQueryError } from "../../../../lib/faqs/types";
@@ -5,6 +6,7 @@ import styles from "../../admin.module.css";
 import { FaqForm } from "../faq-form";
 
 export default async function NewFaqPage() {
+  await requireAdminSession();
   let sortOrder = 1;
   let suggestionFailed = false;
   try {

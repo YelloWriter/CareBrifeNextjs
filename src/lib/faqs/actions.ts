@@ -5,6 +5,7 @@ import { redirect, unstable_rethrow } from "next/navigation";
 import { FAQ_MESSAGES, FAQ_PAGE_SIZE } from "./constants";
 import { faqListPath, readFormValues, readValidatedAttachment, validateFaqText } from "./validation";
 import type { FaqFormState } from "./types";
+import { requireAdminSession } from "../admin/session";
 import { createAdminSupabase } from "../supabase/admin";
 import { removeFaqAttachment, uploadFaqAttachment } from "./storage";
 
@@ -13,6 +14,7 @@ function failure(values: FaqFormState["values"], fieldErrors?: FaqFormState["fie
 }
 
 async function saveFaq(formData: FormData, id?: string): Promise<FaqFormState> {
+  await requireAdminSession();
   const values = readFormValues(formData);
   const text = validateFaqText(values);
   if (Object.keys(text.fieldErrors).length > 0 || text.sortOrder === null) {
@@ -112,6 +114,7 @@ export async function deleteFaq(
   _formData: FormData,
 ): Promise<{ error?: string }> {
   try {
+    await requireAdminSession();
     const supabase = createAdminSupabase();
     if (!supabase) return { error: FAQ_MESSAGES.deleteFailed };
     const existing = await supabase

@@ -46,7 +46,7 @@ Next.js는 페이지 실행과 배포를 담당합니다. 진료 입력은 브�
 
 목록은 질문 검색(`q`), 공개 필터(`status=published|unpublished`), 정렬(`sort=order|updated_desc`), 10개 단위 페이지(`page`)를 지원합니다. 등록·수정·삭제와 참고자료 교체는 서버에서 검증합니다. 참고자료는 PDF, JPEG, PNG, WEBP이며 2MB 이하입니다. 이 파일은 홈에 표시하지 않습니다.
 
-Admin 화면에는 로그인 절차가 없습니다. 확인은 Vercel Preview에서 하고, 인증이나 별도의 접근 제어를 넣기 전에는 Production 관리 화면으로 쓰지 않습니다. `main`에 바로 합치지 않습니다.
+`/admin`은 로그인 화면입니다. 아이디와 비밀번호는 서버에서 `ADMIN_USERNAME`, `ADMIN_PASSWORD`와 비교하고, 세션 쿠키는 `ADMIN_SESSION_SECRET`으로 서명합니다. 세 값은 서버 전용입니다. 로그인하지 않으면 FAQ 관리 화면과 등록·수정·삭제 요청은 거절됩니다.
 
 환경 변수 이름만 사용합니다. 값은 GitHub, README, 코드에 적지 않습니다.
 
@@ -54,9 +54,12 @@ Admin 화면에는 로그인 절차가 없습니다. 확인은 Vercel Preview에
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 SUPABASE_SECRET_KEY=
+ADMIN_USERNAME=
+ADMIN_PASSWORD=
+ADMIN_SESSION_SECRET=
 ```
 
-`SUPABASE_SECRET_KEY`는 서버 전용입니다. `NEXT_PUBLIC_SUPABASE_SECRET_KEY`처럼 브라우저로 전달되는 이름은 사용하지 않습니다. 로컬에서는 `.env.local`에 넣고, Vercel에서는 같은 이름의 Environment Variables를 Preview에 넣습니다. 이름 예시만 `.env.example`에 있습니다.
+`SUPABASE_SECRET_KEY`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `ADMIN_SESSION_SECRET`는 서버 전용입니다. `NEXT_PUBLIC_`로 시작하는 이름에 넣지 않습니다. 로컬에서는 `.env.local`에 넣고, Vercel에서는 같은 이름의 Environment Variables를 넣습니다. 이름 예시만 `.env.example`에 있습니다.
 
 공개 조회는 publishable key와 RLS를 사용합니다. 공개 역할은 게시된 FAQ를 읽기만 할 수 있습니다. 등록·수정·삭제는 서버의 secret key로 처리합니다.
 
@@ -113,7 +116,7 @@ npm run preview
 - 화면을 서버 렌더링하도록 재작성하거나 입력을 서버로 보내지 않습니다. AI·음성·미리보기·타임라인·공유·인쇄·언어 전환 코드는 원본 그대로입니다.
 - 공개 저장소 **YelloWriter/CareBrifeNextjs**만 갱신합니다. 비공개 **YelloWriter/carebrief** 저장소는 이 작업의 대상이 아닙니다.
 - Vercel 프로젝트 `carebrief`를 재사용합니다. Framework Next.js, Build `npm run build`. FAQ 확인은 Preview 배포에서 하고, Production 도메인이나 `carebrief.co.kr`은 이 작업에서 바꾸지 않습니다.
-- Preview에 `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`가 있어야 홈 FAQ와 Admin 저장이 동작합니다. Production에 예전에 있던 `SUPABASE_URL` 이름은 이 기능에서 읽지 않습니다.
+- Preview와 Production에 `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`가 있어야 홈 FAQ와 Admin 저장이 동작합니다. 관리자 로그인에는 `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `ADMIN_SESSION_SECRET`이 필요합니다. Production에 예전에 있던 `SUPABASE_URL` 이름은 이 기능에서 읽지 않습니다.
 - **carebrief.co.kr의 Firebase Hosting은 기존 Vite 버전을 그대로 유지합니다.** 이 저장소의 `firebase.json`, `.firebaserc`는 기존 배포 참조용이며 이번 전환에서 변경하거나 배포하지 않습니다. 남아 있는 과거 `dist`를 Firebase에 올리지 않습니다.
 
 유료 서비스·요금제 변경은 하지 않습니다.
